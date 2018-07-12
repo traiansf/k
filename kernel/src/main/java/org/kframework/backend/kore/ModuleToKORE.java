@@ -68,7 +68,8 @@ public class ModuleToKORE {
         this.module = module;
         this.files = files;
     }
-    private static final boolean ATTRIBUTES = false;
+    private static final boolean ATTRIBUTES = true;
+    private static final boolean ATTRIBUTES_MODULE = false;
     private static final boolean METAVAR = false;
 
     public String convert() {
@@ -80,7 +81,9 @@ public class ModuleToKORE {
         Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
         if (ATTRIBUTES) {
-            sb.append("module ATTRIBUTES\n\n  sort Attribute{} []\n");
+            if (ATTRIBUTES_MODULE) {
+                sb.append("module ATTRIBUTES\n\n  sort Attribute{} []\n");
+            }
             for (Sort sort : iterable(module.definedSorts())) {
                 Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
                 collectAttributes(attributes, att);
@@ -93,28 +96,30 @@ public class ModuleToKORE {
                 Att att = r.att();
                 collectAttributes(attributes, att);
             }
-            for (Map.Entry<String, Boolean> entry : attributes.entrySet()) {
-                if (entry.getValue()) {
-                    sb.append("  sort Att");
-                    convert(entry.getKey());
-                    sb.append("{} []\n");
-                    sb.append("  symbol ");
-                    convert(entry.getKey());
-                    sb.append("{}(Att");
-                    convert(entry.getKey());
-                    sb.append("{}):Attribute{}[]\n");
-                } else {
-                    sb.append("  symbol ");
-                    convert(entry.getKey());
-                    sb.append("{}():Attribute{}[]\n");
+            if (ATTRIBUTES_MODULE) {
+                for (Map.Entry<String, Boolean> entry : attributes.entrySet()) {
+                    if (entry.getValue()) {
+                        sb.append("  sort Att");
+                        convert(entry.getKey());
+                        sb.append("{} []\n");
+                        sb.append("  symbol ");
+                        convert(entry.getKey());
+                        sb.append("{}(Att");
+                        convert(entry.getKey());
+                        sb.append("{}):Attribute{}[]\n");
+                    } else {
+                        sb.append("  symbol ");
+                        convert(entry.getKey());
+                        sb.append("{}():Attribute{}[]\n");
+                    }
                 }
+                sb.append("endmodule []\n\n");
             }
-            sb.append("endmodule []\n\n");
         }
         sb.append("module ");
         convert(module.name());
         sb.append("\n\n// imports\n");
-        if (ATTRIBUTES) {
+        if (ATTRIBUTES_MODULE) {
             sb.append("  import ATTRIBUTES []\n");
         }
         sb.append("  import K []\n\n// sorts\n");
@@ -959,7 +964,8 @@ public class ModuleToKORE {
                 String strVal = val.toString();
                 sb.append(conn);
                 if (attributes.get(name) != null && attributes.get(name)) {
-                    sb.append(name).append("{}(\\dv{Att");
+                    convert(name);
+                    sb.append("{}(\\dv{Att");
                     convert(name);
                     sb.append("{}}(");
                     sb.append(StringUtil.enquoteCString(strVal));
