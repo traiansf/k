@@ -89,7 +89,7 @@ module ARRAY
   imports ARRAY-KORE
 endmodule
 
-module MAP
+module MAP-COMMON
   imports LIST
   imports SET
 
@@ -156,7 +156,7 @@ module MAP
 endmodule
 
 module MAP-SYMBOLIC [symbolic]
-  imports MAP
+  imports MAP-COMMON
   imports K-EQUAL
   rule .Map [ K1 <- V1 ] => K1 |-> V1
 
@@ -179,6 +179,24 @@ module MAP-SYMBOLIC [symbolic]
 
   rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M)
   rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
+endmodule
+
+module MAP-KORE [symbolic,kore]
+  imports MAP-COMMON
+  imports BOOL
+  imports ML-SYNTAX
+
+  /**
+   * Definability conditions for MAP.concat
+   */
+
+  rule #Ceil((K |-> V M1:Map) M2:Map) => {(K in_keys (M1)) #Equals false}  #And {(K in_keys (M2)) #Equals false} #And #Ceil(V) #And #Ceil(M1 M2) [anywhere]
+  rule #Ceil(M2:Map (K |-> V M1:Map)) => {(K in_keys (M1)) #Equals false}  #And {(K in_keys (M2)) #Equals false} #And #Ceil(V) #And #Ceil(M1 M2) [anywhere]
+endmodule
+
+module MAP
+    imports MAP-COMMON
+    imports MAP-KORE
 endmodule
 
 module SET
@@ -416,7 +434,7 @@ module INT-COMMON
 endmodule
 
 module INT-SYMBOLIC [symbolic, kore]
-  imports  INT-COMMON
+  imports INT-COMMON
   imports ML-SYNTAX
 
   /**
