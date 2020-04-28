@@ -296,12 +296,13 @@ KOOL).  */
   rule true  || _ => true
   rule false || E => E
 
-
+/*
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
     [structural, anywhere]
 
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
     requires N >=Int 0 andBool N <Int M  [structural, anywhere]
+*/    
 
   rule sizeOf(array(_,_,N)) => N
 

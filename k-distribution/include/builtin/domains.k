@@ -982,7 +982,7 @@ module K-REFLECTION
 
 endmodule
 
-module K-REFLECTION-SYMBOLIC [symbolic]
+module K-REFLECTION-SYMBOLIC [kast, symbolic]
   imports BASIC-K
   imports STRING
 
